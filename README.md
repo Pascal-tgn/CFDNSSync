@@ -48,7 +48,7 @@ Copy `publish\CfDnsSync.exe` and `deploy\Install-CfDnsSync.ps1` to the Domain Co
 .\Install-CfDnsSync.ps1 -StartAfterInstall
 
 # Custom directory and port
-.\Install-CfDnsSync.ps1 -InstallDir "D:\Services\CfDnsSync" -Port 9000 -StartAfterInstall
+.\Install-CfDnsSync.ps1 -InstallDir "С:\Services\CfDnsSync" -Port 8765 -StartAfterInstall
 ```
 
 The installer registers the Windows Service, creates an Event Log source, runs interactive configuration, encrypts the Cloudflare API token, and creates a Firewall Allow rule for the dashboard port.
