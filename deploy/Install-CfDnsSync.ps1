@@ -19,7 +19,7 @@
 
 .EXAMPLE
     .\Install-CfDnsSync.ps1
-    .\Install-CfDnsSync.ps1 -InstallDir "D:\Services\CfDnsSync" -Port 9000 -StartAfterInstall
+    .\Install-CfDnsSync.ps1 -InstallDir "C:\Services\CfDnsSync" -Port 8765 -StartAfterInstall
 #>
 
 param(

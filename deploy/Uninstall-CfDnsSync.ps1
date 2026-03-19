@@ -30,7 +30,7 @@
     .\Uninstall-CfDnsSync.ps1 -KeepData
 
     # Custom install directory
-    .\Uninstall-CfDnsSync.ps1 -InstallDir "D:\Services\CfDnsSync"
+    .\Uninstall-CfDnsSync.ps1 -InstallDir "C:\Services\CfDnsSync"
 #>
 
 param(
