@@ -1,0 +1,465 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>CfDnsSync — Documentation</title>
+<style>
+  :root {
+    --cf: #F6821F;
+    --cf-dark: #c85f00;
+    --blue: #0078D4;
+    --bg: #0d1117;
+    --bg2: #161b22;
+    --bg3: #1f2937;
+    --border: #30363d;
+    --text: #e6edf3;
+    --text2: #8b949e;
+    --green: #3fb950;
+    --red: #f85149;
+    --yellow: #d29922;
+  }
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  body { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif; background: var(--bg); color: var(--text); font-size: 15px; line-height: 1.7; }
+  a { color: var(--cf); text-decoration: none; }
+  a:hover { text-decoration: underline; }
+
+  /* Layout */
+  .layout { display: flex; min-height: 100vh; }
+  nav { width: 260px; min-width: 260px; background: var(--bg2); border-right: 1px solid var(--border); padding: 24px 0; position: sticky; top: 0; height: 100vh; overflow-y: auto; }
+  main { flex: 1; padding: 48px 64px; max-width: 900px; }
+
+  /* Nav */
+  .nav-logo { padding: 0 20px 20px; border-bottom: 1px solid var(--border); margin-bottom: 12px; }
+  .nav-logo .icon { width: 36px; height: 36px; margin-bottom: 8px; }
+  .nav-logo h1 { font-size: 17px; font-weight: 600; color: var(--text); }
+  .nav-logo p { font-size: 12px; color: var(--text2); margin-top: 2px; }
+  .nav-section { padding: 8px 20px 4px; font-size: 11px; font-weight: 600; text-transform: uppercase; letter-spacing: .08em; color: var(--text2); }
+  nav a { display: block; padding: 5px 20px; font-size: 13.5px; color: var(--text2); border-left: 2px solid transparent; }
+  nav a:hover { color: var(--text); background: var(--bg3); text-decoration: none; }
+  nav a.active { color: var(--cf); border-left-color: var(--cf); background: rgba(246,130,31,.06); }
+
+  /* Content */
+  h1 { font-size: 28px; font-weight: 700; margin-bottom: 12px; color: var(--text); }
+  h2 { font-size: 20px; font-weight: 600; margin: 40px 0 12px; color: var(--text); border-bottom: 1px solid var(--border); padding-bottom: 8px; }
+  h3 { font-size: 16px; font-weight: 600; margin: 28px 0 10px; color: var(--text); }
+  p { margin-bottom: 14px; color: var(--text); }
+  ul, ol { margin: 0 0 14px 24px; }
+  li { margin-bottom: 5px; }
+
+  code { background: var(--bg3); border: 1px solid var(--border); border-radius: 4px; padding: 1px 6px; font-family: 'Cascadia Code','Consolas',monospace; font-size: 13px; color: #e6db74; }
+  pre { background: var(--bg3); border: 1px solid var(--border); border-radius: 8px; padding: 16px 20px; overflow-x: auto; margin: 14px 0 20px; }
+  pre code { background: none; border: none; padding: 0; color: #e6edf3; font-size: 13px; }
+
+  .badge { display: inline-block; padding: 2px 8px; border-radius: 4px; font-size: 12px; font-weight: 500; }
+  .badge-cf { background: rgba(246,130,31,.15); color: var(--cf); border: 1px solid rgba(246,130,31,.3); }
+  .badge-dc { background: rgba(0,120,212,.15); color: #79b8ff; border: 1px solid rgba(0,120,212,.3); }
+  .badge-conflict { background: rgba(248,81,73,.15); color: var(--red); border: 1px solid rgba(248,81,73,.3); }
+  .badge-green { background: rgba(63,185,80,.15); color: var(--green); border: 1px solid rgba(63,185,80,.3); }
+
+  .note { background: rgba(246,130,31,.08); border: 1px solid rgba(246,130,31,.25); border-radius: 8px; padding: 14px 18px; margin: 18px 0; }
+  .note-warn { background: rgba(248,81,73,.08); border-color: rgba(248,81,73,.25); }
+  .note-info { background: rgba(0,120,212,.08); border-color: rgba(0,120,212,.25); }
+  .note strong { color: var(--cf); }
+  .note-warn strong { color: var(--red); }
+  .note-info strong { color: #79b8ff; }
+
+  table { width: 100%; border-collapse: collapse; margin: 14px 0 24px; font-size: 14px; }
+  th { background: var(--bg3); padding: 10px 14px; text-align: left; font-weight: 600; border: 1px solid var(--border); color: var(--text2); font-size: 12px; text-transform: uppercase; letter-spacing: .05em; }
+  td { padding: 9px 14px; border: 1px solid var(--border); vertical-align: top; }
+  tr:hover td { background: var(--bg3); }
+  td code { font-size: 12px; }
+
+  .hero { background: linear-gradient(135deg, var(--bg2) 0%, var(--bg3) 100%); border: 1px solid var(--border); border-radius: 12px; padding: 32px 36px; margin-bottom: 36px; display: flex; align-items: center; gap: 24px; }
+  .hero-icon { flex-shrink: 0; }
+  .hero h1 { font-size: 32px; border: none; margin: 0 0 6px; }
+  .hero p { color: var(--text2); margin: 0; font-size: 16px; }
+
+  .step { display: flex; gap: 16px; margin-bottom: 20px; }
+  .step-num { width: 28px; height: 28px; min-width: 28px; border-radius: 50%; background: var(--cf); color: white; font-size: 13px; font-weight: 700; display: flex; align-items: center; justify-content: center; margin-top: 2px; }
+  .step-content h4 { font-size: 15px; font-weight: 600; margin-bottom: 4px; }
+  .step-content p { margin: 0; color: var(--text2); font-size: 14px; }
+
+  .grid2 { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; margin-bottom: 20px; }
+  .card { background: var(--bg2); border: 1px solid var(--border); border-radius: 8px; padding: 18px 20px; }
+  .card h4 { font-size: 14px; font-weight: 600; margin-bottom: 6px; }
+  .card p { font-size: 13px; color: var(--text2); margin: 0; }
+
+  .toc-list { list-style: none; margin: 0; padding: 0; }
+  .toc-list li { margin: 3px 0; }
+  .toc-list a { color: var(--text2); font-size: 14px; }
+
+  @media (max-width: 768px) {
+    .layout { flex-direction: column; }
+    nav { width: 100%; height: auto; position: static; }
+    main { padding: 24px 20px; }
+    .grid2 { grid-template-columns: 1fr; }
+    .hero { flex-direction: column; }
+  }
+</style>
+</head>
+<body>
+
+<div class="layout">
+
+<!-- Sidebar -->
+<nav>
+  <div class="nav-logo">
+    <svg class="icon" viewBox="0 0 64 64" xmlns="http://www.w3.org/2000/svg">
+      <rect width="64" height="64" rx="12" fill="#F6821F"/>
+      <circle cx="32" cy="32" r="18" fill="none" stroke="white" stroke-width="2"/>
+      <ellipse cx="32" cy="32" rx="9" ry="18" fill="none" stroke="white" stroke-width="2"/>
+      <line x1="14" y1="32" x2="50" y2="32" stroke="white" stroke-width="2"/>
+      <line x1="16" y1="22" x2="48" y2="22" stroke="white" stroke-width="1.5"/>
+      <line x1="16" y1="42" x2="48" y2="42" stroke="white" stroke-width="1.5"/>
+    </svg>
+    <h1>CfDnsSync</h1>
+    <p>Cloudflare → AD DNS Sync</p>
+  </div>
+
+  <div class="nav-section">Getting Started</div>
+  <a href="#overview">Overview</a>
+  <a href="#requirements">Requirements</a>
+  <a href="#installation">Installation</a>
+  <a href="#first-run">First Run</a>
+
+  <div class="nav-section">Configuration</div>
+  <a href="#config-reference">Config Reference</a>
+  <a href="#dry-run">Dry Run Mode</a>
+  <a href="#skipped-records">Skipped Records</a>
+
+  <div class="nav-section">Concepts</div>
+  <a href="#ownership">Record Ownership</a>
+  <a href="#orphans">Orphan Records</a>
+  <a href="#conflicts">Conflicts</a>
+
+  <div class="nav-section">Operations</div>
+  <a href="#dashboard">Web Dashboard</a>
+  <a href="#logging">Logging</a>
+  <a href="#cli">CLI Commands</a>
+  <a href="#uninstall">Uninstalling</a>
+
+  <div class="nav-section">Reference</div>
+  <a href="#troubleshooting">Troubleshooting</a>
+  <a href="#security">Security Notes</a>
+  <a href="#changelog">Changelog</a>
+</nav>
+
+<!-- Main content -->
+<main>
+
+  <!-- Hero -->
+  <div class="hero">
+    <div class="hero-icon">
+      <svg width="64" height="64" viewBox="0 0 64 64" xmlns="http://www.w3.org/2000/svg">
+        <rect width="64" height="64" rx="12" fill="#F6821F"/>
+        <circle cx="32" cy="32" r="18" fill="none" stroke="white" stroke-width="2"/>
+        <ellipse cx="32" cy="32" rx="9" ry="18" fill="none" stroke="white" stroke-width="2"/>
+        <line x1="14" y1="32" x2="50" y2="32" stroke="white" stroke-width="2"/>
+        <line x1="16" y1="22" x2="48" y2="22" stroke="white" stroke-width="1.5"/>
+        <line x1="16" y1="42" x2="48" y2="42" stroke="white" stroke-width="1.5"/>
+      </svg>
+    </div>
+    <div>
+      <h1>CfDnsSync</h1>
+      <p>One-way DNS synchronization from Cloudflare to a local Active Directory Domain Controller. Keeps your internal DNS zone in sync with Cloudflare — automatically, safely, without touching your AD.</p>
+    </div>
+  </div>
+
+  <!-- Overview -->
+  <h2 id="overview">Overview</h2>
+  <p>CfDnsSync is a Windows Service that periodically fetches DNS records from your Cloudflare zone and replicates them into a local AD-integrated DNS zone on your Domain Controller. Synchronization is strictly <strong>one-way</strong>: Cloudflare → DC. The service never modifies Cloudflare.</p>
+
+  <div class="grid2">
+    <div class="card">
+      <h4>⚡ One-way sync</h4>
+      <p>Cloudflare is the source of truth. The DC zone is kept in sync. Never writes back to Cloudflare.</p>
+    </div>
+    <div class="card">
+      <h4>🔒 Safe by default</h4>
+      <p>Starts in Dry Run mode. No changes are applied until you explicitly enable live sync.</p>
+    </div>
+    <div class="card">
+      <h4>🎛️ Ownership model</h4>
+      <p>Every record is tagged as CF Managed, DC Managed, or Conflict. DC-only records are never touched.</p>
+    </div>
+    <div class="card">
+      <h4>🌐 Web dashboard</h4>
+      <p>HTTPS dashboard with Windows authentication. View records, resolve conflicts, adjust settings.</p>
+    </div>
+  </div>
+
+  <h2 id="requirements">Requirements</h2>
+  <ul>
+    <li>Windows Server 2016 or later (Domain Controller)</li>
+    <li>.NET 8 runtime — or use the self-contained build (no runtime needed)</li>
+    <li>Cloudflare account with API token access (<code>Zone → DNS → Read</code> permission)</li>
+    <li>Local Administrator rights on the DC for installation</li>
+    <li>DNS Server role installed on the DC</li>
+  </ul>
+
+  <h2 id="installation">Installation</h2>
+
+  <h3>Step 1 — Build</h3>
+  <p>On a Windows machine with .NET 8 SDK:</p>
+  <pre><code>dotnet publish src\CfDnsSync.csproj -c Release -r win-x64 --self-contained true ^
+  -p:PublishSingleFile=true -p:EnableCompressionInSingleFile=true -o .\publish</code></pre>
+
+  <h3>Step 2 — Copy to DC</h3>
+  <p>Copy <code>publish\CfDnsSync.exe</code> and <code>deploy\Install-CfDnsSync.ps1</code> to the Domain Controller (e.g. <code>C:\Temp\</code>).</p>
+
+  <h3>Step 3 — Run installer</h3>
+  <pre><code># Run as Administrator in PowerShell
+.\Install-CfDnsSync.ps1 -StartAfterInstall
+
+# Custom install directory and port
+.\Install-CfDnsSync.ps1 -InstallDir "D:\Services\CfDnsSync" -Port 9000 -StartAfterInstall</code></pre>
+
+  <p>The installer will:</p>
+  <ol>
+    <li>Copy the binary to the install directory</li>
+    <li>Register the Windows Service (LocalSystem, auto-start)</li>
+    <li>Create a custom Windows Event Log source</li>
+    <li>Run interactive configuration (Zone ID, domain, etc.)</li>
+    <li>Encrypt and store your Cloudflare API token</li>
+    <li>Create a Windows Firewall Allow rule for the dashboard port</li>
+    <li>Configure service recovery (auto-restart on failure)</li>
+  </ol>
+
+  <div class="note note-info">
+    <strong>Token alternative:</strong> Instead of interactive setup, you can place your Cloudflare API token in a file named <code>token.txt</code> in the install directory. On next service start, the token is automatically encrypted with DPAPI and the plaintext file is deleted.
+  </div>
+
+  <h2 id="first-run">First Run</h2>
+
+  <p>After installation, the service starts in <strong>Dry Run mode</strong> — it simulates all sync operations without making any changes to DC DNS. This lets you review planned changes before going live.</p>
+
+  <div class="step">
+    <div class="step-num">1</div>
+    <div class="step-content">
+      <h4>Open the dashboard</h4>
+      <p>Navigate to <code>https://&lt;dc-hostname&gt;:8765</code> in your browser. Accept the self-signed certificate warning on first launch.</p>
+    </div>
+  </div>
+  <div class="step">
+    <div class="step-num">2</div>
+    <div class="step-content">
+      <h4>Review planned changes</h4>
+      <p>The Dashboard tab shows <span class="badge badge-green">WOULD ADD</span> / <span class="badge badge-cf">WOULD UPDATE</span> / <span class="badge badge-conflict">WOULD DELETE</span> entries — what would happen if live sync were enabled.</p>
+    </div>
+  </div>
+  <div class="step">
+    <div class="step-num">3</div>
+    <div class="step-content">
+      <h4>Resolve conflicts</h4>
+      <p>Go to the Records tab. Records shown as <span class="badge badge-conflict">Conflict</span> have different values on CF and DC. Assign ownership manually.</p>
+    </div>
+  </div>
+  <div class="step">
+    <div class="step-num">4</div>
+    <div class="step-content">
+      <h4>Enable live sync</h4>
+      <p>Go to Settings, uncheck <strong>Dry Run Mode</strong>, and save. A confirmation dialog will appear. After saving, the next sync cycle will apply real changes.</p>
+    </div>
+  </div>
+
+  <!-- Config Reference -->
+  <h2 id="config-reference">Configuration Reference</h2>
+  <p>Configuration is stored in <code>config.json</code> in the install directory. You can edit it directly or use the Settings tab in the web dashboard.</p>
+
+  <table>
+    <tr><th>Field</th><th>Default</th><th>Description</th></tr>
+    <tr><td><code>cloudflareZoneId</code></td><td><em>required</em></td><td>Your Cloudflare Zone ID (found on the zone overview page)</td></tr>
+    <tr><td><code>dnsDomain</code></td><td><code>corp.example.com</code></td><td>The DNS zone name on the DC</td></tr>
+    <tr><td><code>dnsServer</code></td><td><code>localhost</code></td><td>DNS server hostname or IP</td></tr>
+    <tr><td><code>syncIntervalMinutes</code></td><td><code>5</code></td><td>How often to sync (minutes)</td></tr>
+    <tr><td><code>webDashboardPort</code></td><td><code>8765</code></td><td>HTTPS port for the web dashboard</td></tr>
+    <tr><td><code>webDashboardBindAddress</code></td><td><code>127.0.0.1</code></td><td>Bind address. Use <code>0.0.0.0</code> for remote access</td></tr>
+    <tr><td><code>allowedAdGroup</code></td><td><code>Domain Admins</code></td><td>AD group allowed to access the dashboard</td></tr>
+    <tr><td><code>dryRunMode</code></td><td><code>true</code></td><td>When true, simulates sync without applying changes. <strong>Enabled by default.</strong></td></tr>
+    <tr><td><code>orphanDeleteAfterCycles</code></td><td><code>3</code></td><td>Cycles a CF-managed record must be absent before deletion from DC</td></tr>
+    <tr><td><code>recordModesRetentionDays</code></td><td><code>90</code></td><td>Days to keep entries in record_modes.json. Entries not seen longer are purged. Set to 0 to disable.</td></tr>
+    <tr><td><code>skipProxiedARecords</code></td><td><code>true</code></td><td>Exclude CF-proxied A records (Anycast IPs)</td></tr>
+    <tr><td><code>skipSslValidationCnames</code></td><td><code>true</code></td><td>Exclude SSL validation CNAMEs (<code>_hex32.subdomain</code> pattern)</td></tr>
+    <tr><td><code>skippedRecords</code></td><td><code>[]</code></td><td>Record names to skip entirely. See <a href="#skipped-records">Skipped Records</a>.</td></tr>
+    <tr><td><code>protectedRecords</code></td><td><em>AD defaults</em></td><td>Records never touched by the service (AD service records)</td></tr>
+    <tr><td><code>certificateThumbprint</code></td><td><em>empty</em></td><td>Thumbprint of cert in <code>LocalMachine\My</code>. Leave empty for auto self-signed.</td></tr>
+    <tr><td><code>certificateCn</code></td><td><em>empty</em></td><td>CN for the auto-generated self-signed certificate</td></tr>
+    <tr><td><code>logDirectory</code></td><td><code>logs</code></td><td>Directory for log files (relative to install dir)</td></tr>
+    <tr><td><code>maxLogAgeDays</code></td><td><code>30</code></td><td>Number of daily log files to retain</td></tr>
+  </table>
+
+  <!-- Dry Run -->
+  <h2 id="dry-run">Dry Run Mode</h2>
+  <p>Dry Run mode is enabled by default. In this mode the service runs the full reconciliation logic — fetching records from Cloudflare, comparing with the DC zone, and computing all required changes — but does not apply any changes to DNS.</p>
+  <p>The Dashboard shows planned changes as <span class="badge badge-green">WOULD ADD</span>, <span class="badge badge-cf">WOULD UPDATE</span>, and <span class="badge badge-conflict">WOULD DELETE</span>. A yellow banner indicates dry run is active.</p>
+  <p>To enable live sync: go to <strong>Settings → Dry Run Mode</strong>, uncheck the checkbox, and save. A confirmation dialog prevents accidental activation.</p>
+  <div class="note">
+    <strong>Note:</strong> If you redeploy or reset <code>config.json</code>, the service returns to Dry Run mode automatically.
+  </div>
+
+  <!-- Skipped Records -->
+  <h2 id="skipped-records">Skipped Records</h2>
+  <p>Some DNS records cannot be reliably synced due to limitations of the Windows DNS PowerShell module. TXT records on nodes with dots in the name (DKIM selectors like <code>selector1._domainkey</code>) are added successfully via <code>dnscmd</code> but cannot be read back by <code>Get-DnsServerResourceRecord</code> in a zone-wide enumeration, causing the service to re-add them on every cycle.</p>
+  <p>Add such records to <strong>Settings → Skipped Records</strong> (one per line). The service will not attempt to sync them at all. Manage them manually on the DC.</p>
+  <pre><code>selector1._domainkey
+selector2._domainkey</code></pre>
+
+  <!-- Ownership -->
+  <h2 id="ownership">Record Ownership</h2>
+  <p>Every DNS record in the zone is assigned an ownership mode:</p>
+
+  <table>
+    <tr><th>Mode</th><th>Behaviour</th></tr>
+    <tr><td><span class="badge badge-cf">CF Managed</span></td><td>Owned by Cloudflare. Service keeps it in sync: creates, updates, and eventually deletes it from DC if it disappears from CF.</td></tr>
+    <tr><td><span class="badge badge-dc">DC Managed</span></td><td>Owned by the DC. Service never touches it — no updates, no deletions. Use this for internal-only records.</td></tr>
+    <tr><td><span class="badge badge-conflict">Conflict</span></td><td>Exists on both sides with different type or value. Service skips it until you resolve ownership in the Records tab.</td></tr>
+  </table>
+
+  <h3>Auto-detection logic</h3>
+  <ul>
+    <li>Record only in Cloudflare → automatically <span class="badge badge-cf">CF Managed</span></li>
+    <li>Record only on DC → automatically <span class="badge badge-dc">DC Managed</span></li>
+    <li>Record on both sides, <strong>same type and same value</strong> → automatically <span class="badge badge-cf">CF Managed</span></li>
+    <li>Record on both sides, <strong>different type or value</strong> → <span class="badge badge-conflict">Conflict</span>, requires manual resolution</li>
+  </ul>
+
+  <p>To change ownership: go to the <strong>Records</strong> tab, find the record, and click the <strong>CF</strong> or <strong>DC</strong> toggle.</p>
+
+  <!-- Orphans -->
+  <h2 id="orphans">Orphan Records</h2>
+  <p>When a CF-managed record disappears from Cloudflare (e.g. it was deleted), the service does not delete it from the DC immediately. Instead it marks it as an Orphan and increments a cycle counter on every sync.</p>
+  <p>Once the counter reaches <code>orphanDeleteAfterCycles</code> (default: 3), the record is deleted from the DC automatically. This grace period protects against accidental deletions due to temporary Cloudflare API issues.</p>
+  <div class="note note-warn">
+    <strong>Safety:</strong> If Cloudflare returns 0 records (API error, expired token, network issue), the sync is aborted and orphan deletion is skipped — preventing accidental wipe of all CF-managed records.
+  </div>
+
+  <!-- Conflicts -->
+  <h2 id="conflicts">Conflicts</h2>
+  <p>A conflict occurs when a record exists on both CF and the DC but with different types or values. Common examples:</p>
+  <ul>
+    <li>A record exists as an A record on the DC but as a CNAME in Cloudflare (e.g. a hostname that was converted to a CNAME redirect)</li>
+    <li>A TXT record with different content on each side</li>
+  </ul>
+  <p>To resolve: go to the <strong>Records</strong> tab, find the conflicted record, and click <strong>CF</strong> (let Cloudflare version win) or <strong>DC</strong> (keep the DC version and ignore Cloudflare).</p>
+
+  <!-- Dashboard -->
+  <h2 id="dashboard">Web Dashboard</h2>
+  <p>The web dashboard is accessible at <code>https://&lt;dc-hostname&gt;:8765</code>. It requires Windows authentication — you must be a member of the configured AD group (default: Domain Admins).</p>
+
+  <table>
+    <tr><th>Tab</th><th>Description</th></tr>
+    <tr><td><strong>Dashboard</strong></td><td>Sync status, statistics, last sync changes (or planned changes in dry-run mode), and sync history.</td></tr>
+    <tr><td><strong>Records</strong></td><td>All DNS records with their ownership mode. Filter, search, and change ownership.</td></tr>
+    <tr><td><strong>Diff</strong></td><td>Live comparison between Cloudflare and DC for each record.</td></tr>
+    <tr><td><strong>Settings</strong></td><td>Edit configuration, manage Skipped Records, toggle Dry Run mode, restart service.</td></tr>
+    <tr><td><strong>Documentation</strong></td><td>Built-in documentation (also available as this file).</td></tr>
+  </table>
+
+  <h3>SSL Certificate</h3>
+  <p>On first start, a self-signed certificate is auto-generated and stored in <code>LocalMachine\My</code>. The certificate thumbprint and netsh binding are configured automatically.</p>
+  <p>To use a trusted certificate, set <code>certificateThumbprint</code> in config.json to the thumbprint of an existing cert in <code>LocalMachine\My</code>.</p>
+
+  <!-- Logging -->
+  <h2 id="logging">Logging</h2>
+  <p>CfDnsSync uses <a href="https://serilog.net">Serilog</a> with two sinks:</p>
+  <ul>
+    <li><strong>Rolling file logs</strong> — all levels (Debug and above), stored in <code>&lt;install-dir&gt;\logs\cfds-YYYYMMDD.log</code>, retained for 30 days (configurable via <code>maxLogAgeDays</code>)</li>
+    <li><strong>Windows Event Log</strong> (Application source: CfDnsSync) — errors only, plus SyncWorker warnings (startup/token failures)</li>
+  </ul>
+  <p>Operational noise (PowerShell batch errors, CF retry warnings, etc.) goes to file only and does not appear in Event Viewer.</p>
+
+  <!-- CLI -->
+  <h2 id="cli">CLI Commands</h2>
+  <pre><code># Interactive first-time configuration
+CfDnsSync.exe setup-config
+
+# Encrypt and store Cloudflare API token
+CfDnsSync.exe setup-token
+
+# Run one sync cycle immediately (for debugging)
+CfDnsSync.exe sync-now</code></pre>
+
+  <div class="note note-warn">
+    <strong>Important:</strong> <code>setup-token</code> must be run as the same Windows account that runs the service (LocalSystem by default). The token is encrypted with DPAPI CurrentUser scope and can only be decrypted by that account.
+  </div>
+
+  <!-- Uninstall -->
+  <h2 id="uninstall">Uninstalling</h2>
+  <pre><code># Run as Administrator
+.\Uninstall-CfDnsSync.ps1
+
+# Keep config and data files
+.\Uninstall-CfDnsSync.ps1 -KeepData</code></pre>
+  <p>The uninstall script stops the service, removes it from the Service Control Manager, removes the Firewall rule, removes the custom Event Log source, and optionally deletes all data files.</p>
+
+  <!-- Troubleshooting -->
+  <h2 id="troubleshooting">Troubleshooting</h2>
+
+  <h3>Service fails to start — "Key not valid for use in specified state"</h3>
+  <p>The DPAPI token was encrypted under a different Windows account. Re-run <code>setup-token</code> as the service account, or place a <code>token.txt</code> file in the install directory and restart the service.</p>
+
+  <h3>Records keep appearing as [ADDED] every sync cycle</h3>
+  <p>The record exists on the DC but the service cannot read it back (common with dotted-name TXT records like DKIM selectors). Add the record name to <strong>Settings → Skipped Records</strong>.</p>
+
+  <h3>Dashboard shows "DRY RUN MODE" banner</h3>
+  <p>The service is in simulation mode. Go to Settings, uncheck Dry Run Mode, and save to enable real sync.</p>
+
+  <h3>record_modes.json is very large</h3>
+  <p>Old DC records (e.g. from decommissioned machines) accumulate over time. They are automatically purged after <code>recordModesRetentionDays</code> (default 90). You can also delete the file to reset all ownership assignments — the service will rebuild it from scratch on the next sync.</p>
+
+  <h3>WIN32 9711 errors in logs</h3>
+  <p>These are "record already exists" errors, silently treated as skipped. They appear in the log file but not as warnings. No action needed.</p>
+
+  <h3>HRESULT 0x800706be errors</h3>
+  <p>RPC failure when adding very long TXT records (e.g. DKIM keys). The service automatically falls back to <code>dnscmd.exe</code> for TXT records. If this persists, add the record to Skipped Records.</p>
+
+  <!-- Security -->
+  <h2 id="security">Security Notes</h2>
+  <ul>
+    <li><strong>DPAPI CurrentUser scope:</strong> The Cloudflare API token is encrypted with Windows DPAPI under the service account. Only that account can decrypt it.</li>
+    <li><strong>NTLM authentication:</strong> The web dashboard uses Windows NTLM authentication. Only members of the configured AD group can access it.</li>
+    <li><strong>Self-signed TLS:</strong> The dashboard uses TLS by default. Replace the self-signed cert with a CA-issued cert for production use.</li>
+    <li><strong>Read-only Cloudflare token:</strong> Use a Cloudflare API token with <code>Zone → DNS → Read</code> permission only. The service never writes to Cloudflare.</li>
+    <li><strong>Dry Run by default:</strong> No DNS changes are applied until you explicitly disable Dry Run mode.</li>
+  </ul>
+
+  <!-- Changelog -->
+  <h2 id="changelog">Changelog</h2>
+  <h3>v1.0.0 — 2026</h3>
+  <ul>
+    <li>Initial release</li>
+    <li>One-way CF → DC DNS synchronization</li>
+    <li>CF Managed / DC Managed / Conflict ownership model</li>
+    <li>HTTPS web dashboard with Windows authentication</li>
+    <li>Dry Run mode (default on)</li>
+    <li>Batch PowerShell execution for performance</li>
+    <li>Serilog file + selective EventLog logging</li>
+    <li>token.txt auto-import on startup</li>
+    <li>record_modes.json retention with configurable TTL</li>
+    <li>Startup validation (Zone ID, token, API permissions)</li>
+    <li>Race condition protection (SemaphoreSlim)</li>
+    <li>Orphan deletion sanity check (abort on 0 CF records)</li>
+    <li>CF API retry with exponential backoff</li>
+  </ul>
+
+</main>
+</div>
+
+<script>
+  // Highlight active nav link based on scroll
+  const sections = document.querySelectorAll('h2[id], h3[id]');
+  const navLinks = document.querySelectorAll('nav a[href^="#"]');
+  const observer = new IntersectionObserver(entries => {
+    entries.forEach(entry => {
+      if (entry.isIntersecting) {
+        navLinks.forEach(l => l.classList.remove('active'));
+        const link = document.querySelector(`nav a[href="#${entry.target.id}"]`);
+        if (link) link.classList.add('active');
+      }
+    });
+  }, { rootMargin: '-20% 0px -75% 0px' });
+  sections.forEach(s => observer.observe(s));
+</script>
+</body>
+</html>
