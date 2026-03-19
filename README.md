@@ -6,6 +6,23 @@ CfDnsSync is a Windows Service that periodically fetches DNS records from your C
 
 ---
 
+## Why does this exist?
+
+The typical approach to keeping an internal DNS zone in sync with Cloudflare is **zone transfer** or **secondary DNS** — both of which assume a clean, homogeneous zone on both sides.
+
+In practice, an Active Directory-integrated DNS zone is rarely clean. It contains a large number of records that have no equivalent in Cloudflare and should never be touched:
+
+- AD service records: `_ldap._tcp`, `_kerberos._tcp`, `_gc._tcp`, domain controller A records, `_msdcs` subtree
+- Internal-only hostnames: printers, servers, VoIP infrastructure, monitoring systems
+- Records that exist on both sides but with intentionally different values (e.g. split-horizon DNS — an internal `mail` A record pointing to an internal IP, while Cloudflare has a CNAME to an external MX relay)
+- DKIM/DMARC records that Windows DNS stores under dotted-name subdomains (`selector._domainkey`) which cannot be reliably enumerated via PowerShell
+
+A zone transfer would wipe all of this. A naive sync script would either skip too much or destroy records it doesn't understand. Conflict detection requires per-record logic, not bulk operations.
+
+CfDnsSync was built to solve exactly this problem: replicate only the records that belong to Cloudflare, leave everything else alone, and give the administrator a clear view of what is CF-owned, what is DC-owned, and what requires manual resolution.
+
+---
+
 ## Features
 
 - **One-way sync** — Cloudflare is the source of truth. The DC zone is kept in sync automatically.
@@ -48,7 +65,7 @@ Copy `publish\CfDnsSync.exe` and `deploy\Install-CfDnsSync.ps1` to the Domain Co
 .\Install-CfDnsSync.ps1 -StartAfterInstall
 
 # Custom directory and port
-.\Install-CfDnsSync.ps1 -InstallDir "С:\Services\CfDnsSync" -Port 8765 -StartAfterInstall
+.\Install-CfDnsSync.ps1 -InstallDir "C:\Services\CfDnsSync" -Port 8765 -StartAfterInstall
 ```
 
 The installer registers the Windows Service, creates an Event Log source, runs interactive configuration, encrypts the Cloudflare API token, and creates a Firewall Allow rule for the dashboard port.
