@@ -1,4 +1,4 @@
-# CfDnsSync
+# CfDnsSync for Windows-based DNS server
 
 **One-way DNS synchronization from Cloudflare to a local Active Directory Domain Controller.**
 
